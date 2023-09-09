@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Animation</title>
+</head>
+<body>
+    <h1>Animation Page</h1>
+    
+    <form method="POST" action="/animation">
+        <input type="text" name="sen" placeholder="Enter a sentence">
+        <input type="submit" value="Submit">
+    </form>
+
+    {% if data %}
+    <h2>Text entered:</h2>
+    <p>{{ data.text }}</p>
+
+    <h2>Key words in sentence:</h2>
+    <ul>
+        {% for word in data.words %}
+        <li>{{ word }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+</body>
+</html>
