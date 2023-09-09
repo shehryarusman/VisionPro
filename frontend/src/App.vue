@@ -10,9 +10,82 @@ export default {
     };
   },
   methods: {
-    toggleCamera() {
-      this.cameraActive = !this.cameraActive; // Toggle the cameraActive flag
+
+    /***
+     * Video
+     */
+    /* eslint-disable */
+     async captureFrameFromStream(stream) {
+        return new Promise((resolve, reject) => {
+            const videoElement = document.createElement('video');
+            videoElement.autoplay = true;
+            videoElement.onloadedmetadata = () => {
+                videoElement.play();
+
+                // When video plays, capture frame to canvas
+                videoElement.onplay = () => {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = videoElement.videoWidth;
+                    canvas.height = videoElement.videoHeight;
+
+                    ctx.drawImage(videoElement, 0, 0);
+
+                    // Convert canvas to HTMLImageElement
+                    const img = new Image();
+                    img.src = canvas.toDataURL('image/png');
+
+                    // Resolve with the necessary elements
+                    resolve({
+                        videoElement: videoElement,
+                        canvasElement: canvas,
+                        imageElement: img
+                    });
+
+                    // Stop the video stream after capturing the frame
+                    stream.getTracks().forEach(track => track.stop());
+                };
+            };
+
+            videoElement.onerror = (err) => {
+                reject(err);
+            };
+
+            videoElement.srcObject = stream;
+        });
     },
+    toggleCamera() {
+    this.cameraActive = !this.cameraActive; // Toggle the cameraActive flag
+
+    if (this.cameraActive) { // If camera is active
+        this.intervalID = setInterval(() => { // Store interval ID to clear it later
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(stream => {
+                    return this.captureFrameFromStream(stream);
+                })
+                .then(({ videoElement, canvasElement, imageElement }) => {
+                    // Clear previous image elements (optional)
+                    const oldImages = document.querySelectorAll('.captured-image');
+                    oldImages.forEach(img => img.remove());
+
+                    // Add a class to new imageElement for easier selection later (optional)
+                    imageElement.classList.add('captured-image');
+
+                    // You have access to the video, canvas, and image elements here
+                    document.body.appendChild(imageElement); // Append the captured image frame to the body
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                });
+        }, 1000); // Repeat every 1 second
+    } else { 
+        clearInterval(this.intervalID); // If camera is deactivated, stop the interval
+    }
+},
+
+    /**
+     * NLP
+     */
     toggleRecording() {
       if (!this.recordingActive) {
         // Start audio recording
@@ -77,7 +150,7 @@ export default {
       <div class="box">
         <h1 class="subtitle">Camera</h1>
         <!-- Display the camera if cameraActive is true -->
-        <camera v-if="cameraActive" :resolution=autoplay></camera>
+        <camera ref="video" v-if="cameraActive" :resolution=autoplay></camera>
       </div>
   
   
