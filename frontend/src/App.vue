@@ -1,22 +1,3 @@
-<!-- App.vue -->
-<template>
-  <div>
-    <h1 class="title has-text-centered mt-5">VisionPro</h1>
-
-    <!-- Button to show/hide the camera -->
-    <button @click="toggleCamera">{{ cameraActive ? 'Hide Camera' : 'Show Camera' }}</button>
-
-    <!-- Display the camera if cameraActive is true -->
-    <camera v-if="cameraActive" :resolution=autoplay></camera>
-
-   <!-- Button to start/stop audio recording -->
-    <button @click="toggleRecording">{{ recordingActive ? 'Stop Recording' : 'Start Recording' }}</button>
-
-    <!-- Display the recorded text here -->
-    <textarea v-model="recordedText" placeholder="Recorded Text"></textarea>
-  </div>
-</template>
-
 <script>
 export default {
   name: "App",
@@ -24,13 +5,13 @@ export default {
     return {
       cameraActive: false,     // To toggle camera display
       recordingActive: false,  // To toggle audio recording
-      recordedText: "",        // To store recorded text
+      recordedText: ["first one", "second sentence"],       // To store recorded text
       recognition: null,       // SpeechRecognition object
     };
   },
   methods: {
     toggleCamera() {
-    this.cameraActive = !this.cameraActive; // Toggle the cameraActive flag
+      this.cameraActive = !this.cameraActive; // Toggle the cameraActive flag
     },
     toggleRecording() {
       if (!this.recordingActive) {
@@ -51,7 +32,8 @@ export default {
         this.recognition.onresult = (event) => {
           for (let i = event.resultIndex; i < event.results.length; i++) {
             if (event.results[i].isFinal) {
-              this.recordedText += event.results[i][0].transcript;
+              this.recordedText.push(event.results[i][0].transcript);
+              console.log(event.results[i][0].transcript);
             }
           }
         };
@@ -85,3 +67,41 @@ export default {
 };
 
 </script>
+
+<template>
+  <div>
+    <h1 class="title has-text-centered mt-5">VisionPro</h1>
+
+    <div class="is-flex is-flex-direction-column is-align-items-center">
+  
+      <div class="box">
+        <h1 class="subtitle">Camera</h1>
+        <!-- Display the camera if cameraActive is true -->
+        <camera v-if="cameraActive" :resolution=autoplay></camera>
+      </div>
+  
+  
+      <!-- Display the recorded text here -->
+      <ul class="is-flex is-flex-direction-column is-align-items-center box">
+        <li v-for="(line, index) in recordedText" :key="index" class="subtitle">
+          {{ line }}
+        </li>
+      </ul>
+
+      <div class="is-flex is-flex-direction-row gap-30">
+        <span class="is-flex is-flex-direction-column is-align-items-center">
+          <a @click="toggleCamera" class="title m-0">
+            <font-awesome-icon :icon="['fas', 'camera']" />
+          </a>
+          Show Camera
+        </span>
+        <span class="is-flex is-flex-direction-column is-align-items-center">
+          <a @click="toggleRecording" :class="{ 'has-text-danger': recordingActive }" class="title p-0">
+            <font-awesome-icon icon="fa-solid fa-microphone" />
+          </a>
+          Record
+        </span>
+      </div>
+    </div>
+  </div>
+</template>
