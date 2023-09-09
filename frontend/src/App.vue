@@ -29,6 +29,9 @@ export default {
     };
   },
   methods: {
+    toggleCamera() {
+    this.cameraActive = !this.cameraActive; // Toggle the cameraActive flag
+    },
     toggleRecording() {
       if (!this.recordingActive) {
         // Start audio recording

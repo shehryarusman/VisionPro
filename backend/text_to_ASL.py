@@ -9,7 +9,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
-    return render_template('animation.html')
+    return render_template('test.html')
 
 @app.route('/animation', methods=['POST'])
 def animation_view():
