@@ -5,7 +5,7 @@ export default {
     return {
       cameraActive: false,     // To toggle camera display
       recordingActive: false,  // To toggle audio recording
-      recordedText: ["first one", "second sentence"],       // To store recorded text
+      recordedText: [],       // To store recorded text
       recognition: null,       // SpeechRecognition object
     };
   },
