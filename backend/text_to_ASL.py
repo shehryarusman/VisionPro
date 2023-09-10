@@ -1,19 +1,23 @@
-from flask import Flask, request, render_template
+from flask import Flask, request, jsonify, render_template
+from flask_cors import CORS
 import nltk
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 
+nltk.download('punkt')
 nltk.download('wordnet')
 
 app = Flask(__name__)
+cors = CORS(app)
 
 @app.route('/')
 def index():
-    return render_template('animation.html')
+    return render_template('test.html')
 
 @app.route('/animation', methods=['POST'])
 def animation_view():
 	if request.method == 'POST':
+		responseType = request.form.get('responseType')
 		text = request.form.get('sen')
 		#tokenizing the sentence
 		text.lower()
@@ -88,7 +92,10 @@ def animation_view():
         }
 		print(response_data)
 
-		return render_template('test.html', data=response_data)
+		if responseType == 'json':
+			return jsonify(response_data)
+		else:
+			return render_template('test.html', data=response_data)
 	else:
 		return render_template('test.html', data=None)
 
