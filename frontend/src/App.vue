@@ -2,7 +2,8 @@
 import _ from "lodash";
 import api from "./api";
 import GestureRender from "./components/GestureRender.vue";
-import SignClass from "./SignClass.vue";
+import SignClass from "./components/SignClass.vue";
+import { useSpeechSynthesis } from '@vueuse/core'
 
 export default {
   name: "App",
@@ -16,7 +17,8 @@ export default {
       recognition: null,       // SpeechRecognition object
       responseMode: "gestures", // Either "words" or "gestures"
       gestureDelay: 500,
-      gestureTimer: null
+      gestureTimer: null,
+      textToSpeak: ""
     };
   },
   components: {
@@ -90,14 +92,23 @@ export default {
       const el = this.$refs.bottomAnchor;
 
       if (el) {
-        // Use el.scrollIntoView() to instantly scroll to the element
         el.scrollIntoView({ behavior: "smooth" });
       }
     },
     updateGesture() {
       this.renderedLetters.push(this.lettersToRender.shift());
       this.scrollToBottom();
-    }
+    },
+    appendLetter(letter){
+      if(letter === "escape"){
+        const speech = useSpeechSynthesis(this.textToSpeak)
+        speech.speak();
+        this.textToSpeak = "";
+      }
+      else{
+        this.textToSpeak += letter;
+      }
+    },
   },
   watch: {
     recordedText: {
@@ -146,9 +157,8 @@ export default {
 <template>
   <div class="is-flex is-flex-direction-column is-align-items-center">
     <div class="container is-flex is-flex-direction-column is-align-items-flex">
-  
       <div class="box is-flex is-flex-direction-column is-align-items-stretch mt-5">
-
+        
         <div class="is-flex is-flex-direction-row is-justify-content-space-between">
           <h2 class="subtitle has-text-centered m-0">VisionPro</h2>
           <a @click="toggleCamera" class="is-flex is-flex-direction-row is-align-items-center has-text-link m-0">
@@ -160,7 +170,8 @@ export default {
         </div>
 
         <div v-if="cameraActive" class="mt-2">
-          <camera autoplay></camera>
+          <!-- <camera autoplay></camera> -->
+          <SignClass @letter-detected="appendLetter"/>
         </div>
 
       </div>
@@ -239,7 +250,6 @@ export default {
       </span>
     </div>
   </div>
-  <SignClass/>
 </template>
 
 <style scoped>
