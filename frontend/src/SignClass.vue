@@ -1,5 +1,5 @@
 <script>
-const URL = "https://teachablemachine.withgoogle.com/models/2aXYqwnRr/";
+let URL = "https://teachablemachine.withgoogle.com/models/2aXYqwnRr/";
 
 import * as tmImage from '@teachablemachine/image';
 import '@tensorflow/tfjs';
@@ -12,8 +12,10 @@ export default {
     webcam:null, 
     labelContainer:null, 
     maxPredictions:null,
+    f: 0,
     };
   },
+  emit: ["letter-detected"],
   methods : {
     async init() {
         const modelURL = URL + "model.json";
@@ -23,12 +25,12 @@ export default {
         // Refer to tmImage.loadFromFiles() in the API to support files from a file picker
         // or files from your local hard drive
         // Note: the pose library adds "tmImage" object to your window (window.tmImage)
-        this.model = await Object.freeze(await tmImage.load(modelURL, metadataURL));
+        this.model = await tmImage.load(modelURL, metadataURL);
         this.maxPredictions = this.model.getTotalClasses();
 
         // Convenience function to setup a webcam
         const flip = true; // whether to flip the webcam
-        this.webcam = new tmImage.Webcam(360, 360, flip); // width, height, flip
+        this.webcam = new tmImage.Webcam(200, 200, flip); // width, height, flip
         await this.webcam.setup(); // request access to the webcam
         await this.webcam.play();
         window.requestAnimationFrame(this.loop);
@@ -44,6 +46,7 @@ export default {
         this.webcam.update(); // update the webcam frame
         await this.predict();
         window.requestAnimationFrame(this.loop);
+        this.f+=1;
     },
     indexOfMax(arr) {
     if (arr.length === 0) {
@@ -72,8 +75,12 @@ export default {
             probs.push(prediction[i].probability.toFixed(2));
             classnames.push(prediction[i].className);
         }
-        const classPrediction = classnames[this.indexOfMax(probs)] + ": " + (Math.max.apply(Math, probs)*100).toFixed(1) + "%";
-        this.labelContainer.innerHTML = classPrediction;
+        console.log(this.f);
+        this.labelContainer.innerHTML = classnames[this.indexOfMax(probs)] + ": " + (Math.max.apply(Math, probs)*100).toFixed(1) + "%";
+        if ((Math.max.apply(Math, probs) > 0.9)){
+          //this.$emit("letter-detected", classnames[this.indexOfMax(probs)]);
+          console.log(classnames[this.indexOfMax(probs)]);
+        }
   },
   }
 };

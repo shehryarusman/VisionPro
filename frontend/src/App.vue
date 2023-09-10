@@ -26,11 +26,9 @@ export default {
     SignClass,
   },
   methods: {
-
     /***
      * Video
      */
-    /* eslint-disable */
     toggleCamera() {
     this.cameraActive = !this.cameraActive; // Toggle the cameraActive flag
 },
@@ -99,14 +97,16 @@ export default {
       this.renderedLetters.push(this.lettersToRender.shift());
       this.scrollToBottom();
     },
-    appendLetter(letter){
-      if(letter === "escape"){
+    async appendLetter(letter){
+      if(letter === "ex"){
         const speech = useSpeechSynthesis(this.textToSpeak)
         speech.speak();
         this.textToSpeak = "";
       }
       else{
-        this.textToSpeak += letter;
+        // this.textToSpeak += letter;
+        await new Promise(r => setTimeout(r, 20000));
+        document.getElementById('message').innerHTML = "Hello";
       }
     },
   },
@@ -147,7 +147,7 @@ export default {
       this.updateGesture();
     }, this.gestureDelay);
   },
-  beforeDestroy() {
+  beforeUnmount() {
     clearInterval(this.gestureTimer)
   }
 };
@@ -160,7 +160,7 @@ export default {
       <div class="box is-flex is-flex-direction-column is-align-items-stretch mt-5">
         
         <div class="is-flex is-flex-direction-row is-justify-content-space-between">
-          <h2 class="subtitle has-text-centered m-0">VisionPro</h2>
+          <h2 class="subtitle has-text-centered m-0">Sign Sync</h2>
           <a @click="toggleCamera" class="is-flex is-flex-direction-row is-align-items-center has-text-link m-0">
             <span class="subtitle mr-2 has-text-link">
               <font-awesome-icon :icon="['fas', 'camera']" />
@@ -174,6 +174,7 @@ export default {
           <SignClass @letter-detected="appendLetter"/>
           {{ textToSpeak }}
         </div>
+        <div id="message"></div>
 
       </div>
         <div class="is-flex is-flex-direction-row mb-5 gap-15">
