@@ -45,15 +45,35 @@ export default {
         await this.predict();
         window.requestAnimationFrame(this.loop);
     },
+    indexOfMax(arr) {
+    if (arr.length === 0) {
+        return -1;
+    }
+
+    var max = arr[0];
+    var maxIndex = 0;
+
+    for (var i = 1; i < arr.length; i++) {
+        if (arr[i] > max) {
+            maxIndex = i;
+            max = arr[i];
+        }
+    }
+
+    return maxIndex;
+  },
     // run the webcam image through the image model
     async predict() {
         // predict can take in an image, video or canvas html element
         const prediction = await this.model.predict(this.webcam.canvas);
+        let probs = []
+        let classnames = []
         for (let i = 0; i < this.maxPredictions; i++) {
-            const classPrediction =
-                prediction[i].className + ": " + prediction[i].probability.toFixed(2);
-            this.labelContainer.childNodes[i].innerHTML = classPrediction;
+            probs.push(prediction[i].probability.toFixed(2));
+            classnames.push(prediction[i].className);
         }
+        const classPrediction = classnames[this.indexOfMax(probs)] + ": " + (Math.max.apply(Math, probs)*100).toFixed(1) + "%";
+        this.labelContainer.innerHTML = classPrediction;
   },
   }
 };
