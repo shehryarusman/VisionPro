@@ -47,16 +47,44 @@ export default {
         await this.predict();
         window.requestAnimationFrame(this.loop);
     },
+    indexOfMax(arr) {
+    if (arr.length === 0) {
+        return -1;
+    }
+
+    var max = arr[0];
+    var maxIndex = 0;
+
+    for (var i = 1; i < arr.length; i++) {
+        if (arr[i] > max) {
+            maxIndex = i;
+            max = arr[i];
+        }
+    }
+
+    return maxIndex;
+  },
+  async sleep(time){
+    return new Promise(res => setTimeout(res, time, "done"));
+},
     // run the webcam image through the image model
     async predict() {
         // predict can take in an image, video or canvas html element
         const prediction = await this.model.predict(this.webcam.canvas);
+        let probs = []
+        let classnames = []
         for (let i = 0; i < this.maxPredictions; i++) {
-            const classPrediction =
-                prediction[i].className + ": " + prediction[i].probability.toFixed(2);
-            this.labelContainer.childNodes[i].innerHTML = classPrediction;
+            probs.push(prediction[i].probability.toFixed(2));
+            classnames.push(prediction[i].className);
         }
-    }
+        const classPrediction = classnames[this.indexOfMax(probs)] + ": " + (Math.max.apply(Math, probs)*100).toFixed(1) + "%";
+        this.labelContainer.innerHTML = classPrediction;
+        if (Math.max.apply(Math, probs) > 0.9){
+          this.$emit("letterDetected", classnames[this.indexOfMax(probs)]);
+          // await this.sleep(500);
+           //called whenever you decide on a letter
+        }
+    },
   },
   mounted(){
     this.init();
@@ -65,12 +93,6 @@ export default {
 </script>
 
 <template>
-    <!-- <span class="is-flex is-flex-direction-column is-align-items-center">
-          <a @click="init" class="title m-0">
-            <font-awesome-icon :icon="['fas', 'camera']" />
-          </a>
-          Show Camera
-        </span> -->
     <div id="webcam-container"></div>
     <div id="label-container"></div>
 </template>

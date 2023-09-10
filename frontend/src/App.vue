@@ -172,6 +172,7 @@ export default {
         <div v-if="cameraActive" class="mt-2">
           <!-- <camera autoplay></camera> -->
           <SignClass @letter-detected="appendLetter"/>
+          {{ textToSpeak }}
         </div>
 
       </div>
